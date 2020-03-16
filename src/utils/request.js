@@ -59,6 +59,14 @@ instance.interceptors.response.use(function (response) {
  *
  */
   if (error.response && error.response.status === 401) {
+    // 抽提对象
+    var path = {
+      path: '/login', // 跳转地址
+      query: {
+        redirectUrl: router.currentRoute.fullPath// 表示登录页要跳转的地止
+      } // 路由传参的两个写法 动态路由 和 query()
+    }
+
     //   如果状态码是404的话 就认为token失效了  就需要处理token失效的问题
     // refresh_token 相当于续命的药
     if (store.state.user.refresh_token) {
@@ -67,26 +75,34 @@ instance.interceptors.response.use(function (response) {
     // 需要调用刷新token的接口  调用接口用axios工具 还是instance工具?
     // 发送请求 这里必须用axios 因为现在token已经失效了 instance 的拦截器 还是会将失效的token注入到headers中 造成死循环
     // 需要没有拦截器的axios来发 刷新token(接口) 的请求
-      const result = await axios({
-        method: 'put', // 请求类型
-        url: 'http://ttapi.research.itcast.cn/app/v1_0/authorizations', // 请求完整地址
-        headers: {
-          Authorization: `Bearer ${store.state.user.refresh_token}` // 在请求头中注入 refresh_token
-        }
-      })
-      //   await 后面就是promise执行 成功 完成的逻辑
-      //   如果请求成功 会返回一个新token ( result.data.token ) 用新token 去更新失效的token
-      //   提交mutations 更新vuex数据
-      store.commit('updateUser', {
+      try {
+        const result = await axios({
+          method: 'put', // 请求类型
+          url: 'http://ttapi.research.itcast.cn/app/v1_0/authorizations', // 请求完整地址
+          headers: {
+            Authorization: `Bearer ${store.state.user.refresh_token}` // 在请求头中注入 refresh_token
+          }
+        })
+        //   await 后面就是promise执行 成功 完成的逻辑
+        //   如果请求成功 会返回一个新token ( result.data.token ) 用新token 去更新失效的token
+        //   提交mutations 更新vuex数据
+        store.commit('updateUser', {
         //   载荷数据
-        user: {
-          token: result.data.token, // 最新的token
-          refresh_token: store.state.user.refresh_token // 还是原来的refresh_token 14天之后过期
-        }
-      })
-      //   之所以会来这个位置 是因为401 也意味着之前的请求是错误的
-      // 换了新的token 需要把之前的请求再次发送出去  用instance
-      return instance(error.config) // 相当于执行之前401错误的请求 返回这个请求的目的是 继续执行这个请求执行链下面的内容
+          user: {
+            token: result.data.token, // 最新的token
+            refresh_token: store.state.user.refresh_token // 还是原来的refresh_token 14天之后过期
+          }
+        })
+        //   之所以会来这个位置 是因为401 也意味着之前的请求是错误的
+        // 换了新的token 需要把之前的请求再次发送出去  用instance
+        return instance(error.config) // 相当于执行之前401错误的请求 返回这个请求的目的是 继续执行这个请求执行链下面的内容
+      } catch (error) {
+        // 如果失败意味着 尝试续命 续命失败  说明refresh_token 14天已过期
+        // 应该重新登录 重新登陆之前 需要删掉 token 因为此时token失效 refresh_token也失效
+        store.commit('delUser')
+        // 重新回到登录页
+        router.push(path)
+      }
     } else {
       // 如果没有refresh 我们不能直接router.push('/login')跳到登录页 我们还要携带当前的地址
       // 如果token失效 直接跳到登录页 当前页面怎么办
@@ -95,12 +111,8 @@ instance.interceptors.response.use(function (response) {
     //   登录页面 登录成功之后 先判断 有没有要跳转的地址 如果没有跳到主页 如果有 跳到需要跳转的页面
     // router.currentRoute 表示当前路由的信息对象 里面包含了路由的地址和参数
     // 我们需要获取 当前路由 带参数的地址通过 router.currentRoute.fullPath来获取  fullPath表示带参数 path表示不带参数
-      router.push({
-        path: '/login', // 跳转地址
-        query: {
-          redirectUrl: router.currentRoute.fullPath// 表示登录页要跳转的地止
-        } // 路由传参的两个写法 动态路由 和 query()
-      })
+      store.commit('delUser') // 也要删除token 因为token已经失效
+      router.push(path)
     }
   }
   // 直接返回失败
