@@ -14,7 +14,7 @@ export function setUser (user) {
 // 2.获取并且返回用户的token信息
 export function getUser () {
   // 将字符串转化为对象再返回
-  return JSON.parse(window.localStorage.getItem(USER_TOKEN) || {}) // 短路表达式
+  return JSON.parse(window.localStorage.getItem(USER_TOKEN) || '{}') // 短路表达式
 //   如果前面为true 则后面不执行 如果前面为false 后面才执行
 }
 
