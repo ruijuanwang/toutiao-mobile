@@ -1,7 +1,6 @@
 <template>
       <!-- 公用布局 -->
 <div class="container">
-  <div>
   <!-- 导航栏组件 采用vant组建的导航  fixed 表示固定在顶部-->
   <!-- 当页面地址是 /user 的时候 应该隐藏掉 导航 否则不隐藏 -->
   <!-- @事件名="逻辑" -->
@@ -23,7 +22,6 @@
   <van-tabbar-item icon="user-circle-o" to="/user">我的</van-tabbar-item>
 
 </van-tabbar>
-  </div>
 </div>
 
 </template>
