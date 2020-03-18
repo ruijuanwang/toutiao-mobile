@@ -105,7 +105,8 @@ export default {
           this.$router.push(redirectUrl || '/') // 短路表达式
         } catch (error) {
           // 提示消息 提示用户 登录失败
-          this.$notify({ message: '用户名或者验证码错误', duration: 800 })
+          // this.$notify({ message: '用户名或者验证码错误', duration: 800 })
+          this.$wnotify({ message: '用户名或者密码错误' })
           // 这里使用一个自己封装的方法
         }
       }
