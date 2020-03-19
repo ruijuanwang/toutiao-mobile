@@ -5,7 +5,8 @@
   <van-tabs >
     <!-- 内部需要放置子标签 title值为标签当前显示的内容 -->
     <!-- van-tab 是vant的组件 -->
-    <van-tab :title="`标签${item}`" v-for="item in 10" :key="item">
+    <!-- 拿到channels频道数据之后 循环 -->
+    <van-tab :title="item.name" v-for="item in channels" :key="item.id">
        <!-- 生成若干个单元格 -->
       <!-- scroll-wrapper 样式设置-->
       <!-- <div class="scroll-wrapper">
@@ -27,9 +28,27 @@
 
 <script>
 import ArticleList from './components/article-list' // 引入文章列表组件
+import { getMyChannels } from '@/api/channels'
 export default {
   components: {
     ArticleList // 注册文章列表组件
+  },
+  data () {
+    return {
+      channels: [] // 接收频道数据
+    }
+  },
+  methods: {
+    // 获取频道数据方法
+    async getMyChannels () {
+      const ruselt = await getMyChannels() // 接收返回的数据结果
+      this.channels = ruselt.channels // 将数据赋值给data中的变量
+    }
+
+  },
+  created () {
+    // 直接获取频道数据
+    this.getMyChannels()
   }
 }
 </script>
