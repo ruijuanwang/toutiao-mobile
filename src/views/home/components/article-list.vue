@@ -13,7 +13,7 @@
         <!-- 循环内容 -->
         <van-cell-group>
           <!-- 循环单元格 -->
-          <van-cell v-for="item in articles" :key="item">
+          <van-cell v-for="item in articles" :key="item.id">
             <!-- 放置元素 文章列表的循环项 无图 单图 三图 -->
             <div class="article_item">
               <!-- 标题 -->
@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { MyArticles } from '@/api/articles' // 获取文章列表方法
 export default {
   // props:['channel_id'] //1. 数字符串组 接收方式
   // props 2.对象形式 可以约束传入的值 必填 传值类型
@@ -70,8 +71,8 @@ export default {
   },
   methods: {
     // 1.上拉加载
-    onLoad () {
-      console.log('开始请求数据')
+    async onLoad () {
+      console.log('开始请求文章列表数据')
       // 如果加载状态 检测机制 高度不够 还是会自动执行 load事件 开启上拉加载
       // 如果有数据 应该把数据加载到 list 中
       // 要想关掉
@@ -82,19 +83,35 @@ export default {
       // 如果你的数据已经加载完毕 应该把finished 设置为true 表示一切已经结束了 不在请求
       // 此时判断 如果条数大于50 说明数据加载完毕
       // vant-list组件 第一次加载 需要让list组件 出现滚动条 如果没有滚动条 就没办法继续往下拉
-      if (this.articles.length > 50) {
-        // 如果此时数据已经大于50条
-        this.finished = true // 关闭加载 onload就不会再自动触发执行
+      // if (this.articles.length > 50) {
+      //   // 如果此时数据已经大于50条
+      //   this.finished = true // 关闭加载 onload就不会再自动触发执行
+      // } else {
+      //   // 1-60 ==>this.articles.length + index + 1
+      //   var arr = Array.from(
+      //     Array(15),
+      //     (value, index) => this.articles.length + index + 1
+      //   )
+      //   // 上拉加载 不是覆盖之前的数据 而是追加到数组队尾
+      //   this.articles.push(...arr)
+      //   // 添加完成之后 需要手动关闭loading
+      //   this.upLoading = false
+      // }
+      // ----------------------------------------------------------------------------------------上拉加载 真实数据
+      // this.timestamp || Date.now() 表示 如果有历史时间戳 就传入历史时间戳 否则用当前的时间戳
+      var result = await MyArticles({ channel_id: this.channel_id, timestamp: this.timestamp || Date.now() }) // this.channel_id 是当前的频道id
+      //  获取内容
+
+      this.articles.push(...result.results) // 用... 把数据追加到队尾
+      this.upLoading = false // 数据获取回来 关闭加载状态
+      // 赋值历史时间戳的时候先 判断历史事件戳 是否为0
+      // 如果为0 说明已经没有数据了 数据都已加载完毕 应该宣布结束 finished为true
+      if (result.pre_timestamp) {
+        // 如果有历史时间戳 表示还有数据可以继续进行加载
+        this.timestamp = result.pre_timestamp // 把历史时间戳赋值给data中的变量
       } else {
-        // 1-60 ==>this.articles.length + index + 1
-        var arr = Array.from(
-          Array(15),
-          (value, index) => this.articles.length + index + 1
-        )
-        // 上拉加载 不是覆盖之前的数据 而是追加到数组队尾
-        this.articles.push(...arr)
-        // 添加完成之后 需要手动关闭loading
-        this.upLoading = false
+        // 没有数据可以请求了
+        this.finished = true
       }
     },
     // 2.下拉刷新
