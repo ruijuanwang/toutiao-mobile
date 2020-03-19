@@ -67,7 +67,7 @@ export default {
   },
   data () {
     return {
-      successText: '刷新成功', // 上拉刷新文案
+      successText: '', // 上拉刷新文案
       downLoading: false, // 下拉刷新
       upLoading: false, // 表示是否开启上拉加载 默认 false
       finished: false, // 表示是否已经完成 所有数据的加载
@@ -78,7 +78,7 @@ export default {
   methods: {
     // 1.上拉加载
     async onLoad () {
-      console.log('开始请求文章列表数据')
+      // console.log('开始请求文章列表数据')
       // 如果加载状态 检测机制 高度不够 还是会自动执行 load事件 开启上拉加载
       // 如果有数据 应该把数据加载到 list 中
       // 要想关掉
@@ -121,17 +121,39 @@ export default {
       }
     },
     // 2.下拉刷新
-    onRefresh () {
+    async onRefresh () {
       // ----------------------------------------------------------------------------------下拉刷新 模拟数据
-      setTimeout(() => {
-        // 下拉刷新 表示要读取最新的数据 而且最新的数据要添加到数据头部
-        var arr = Array.from(Array(2), (value, index) => `追加${index + 1}`)
-        // 数组添加到头部
-        this.articles.shift(...arr)
-        // 手动关闭正在刷新的状态
-        this.downLoading = false
-        this.successText = `更新了${arr.length}条数据` // 刷新完毕提示文案
-      }, 1000)
+      // setTimeout(() => {
+      //   // 下拉刷新 表示要读取最新的数据 而且最新的数据要添加到数据头部
+      //   var arr = Array.from(Array(2), (value, index) => `追加${index + 1}`)
+      //   // 数组添加到头部
+      //   this.articles.shift(...arr)
+      //   // 手动关闭正在刷新的状态
+      //   this.downLoading = false
+      //   this.successText = `更新了${arr.length}条数据` // 刷新完毕提示文案
+      // }, 1000)
+      // ----------------------------------------------------------------------------------下拉刷新 真实数据
+      // 下拉刷新时间戳永远是最新的
+      const result = await MyArticles({ timestamp: Date.now(), channel_id: this.channel_id })
+      // 数据请求成功 手动关闭下拉刷新的状态
+      this.downLoading = false // 下拉刷新数据已经加载完毕
+      // 需要判断 最新的时间戳能否请求回来数据 如果能请求回来 把新数据替换旧数据 如果不能 提示用户 没有新的数据了
+      if (result.results.length) {
+        // 如果有返回值
+        //  直接将整个articles替换 而不是追加
+        this.articles = result.results // 历史数据全部被覆盖
+        // 此时 已经将之前的数据全部覆盖了 假如 你之前把数据拉到了低端 也就意味着 之前的finished 已经是true了
+        // 判断有无历史时间戳
+        if (result.pre_timestamp) {
+          // 因为下拉刷新 换来了新的数据 里面又有时间戳
+          this.finished = false // 重新唤醒列表的上拉加载
+          this.timestamp = result.pre_timestamp // 把历史时间戳赋值给当前数据
+        }
+        this.successText = `更新了${result.results.length}条数据`
+      } else {
+        // 如果没有换来最新的数据
+        this.successText = '当前已是最新了'
+      }
     }
   }
 }
