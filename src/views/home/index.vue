@@ -15,7 +15,8 @@
         </van-cell-group>
       </div> -->
       <!-- 有多少个van-tab标签  就有多少个article-list组件 相当于多个article-list实例 -->
-      <ArticleList></ArticleList>
+      <!-- 需要将频道id传给每一个列表组件 父传子 props -->
+      <ArticleList :channel_id='item.id'></ArticleList>
     </van-tab>
   </van-tabs>
   <!-- 在tabs下放置图标 编辑频道的图标 -->

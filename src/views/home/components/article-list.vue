@@ -48,13 +48,24 @@
 
 <script>
 export default {
+  // props:['channel_id'] //1. 数字符串组 接收方式
+  // props 2.对象形式 可以约束传入的值 必填 传值类型
+  props: {
+    // key(props属性):value(对象 配置)
+    channel_id: {
+      required: true, // 必填项 此属性的含义是true 要求该props必须传
+      type: Number, // 表示要传入的props属性的类型
+      default: null // 表示默认值 假如没有传props属性 默认值 就会被采用
+    }
+  },
   data () {
     return {
       successText: '刷新成功', // 上拉刷新文案
       downLoading: false, // 下拉刷新
       upLoading: false, // 表示是否开启上拉加载 默认 false
       finished: false, // 表示是否已经完成 所有数据的加载
-      articles: [] // 文章列表内容
+      articles: [], // 文章列表内容
+      timestamp: null // 定义时间戳属性 用来存储 后端返回的历史时间戳
     }
   },
   methods: {
