@@ -13,27 +13,33 @@
         <!-- 循环内容 -->
         <van-cell-group>
           <!-- 循环单元格 -->
-          <van-cell v-for="item in articles" :key="item.id">
+          <!-- item.art_id 是一个大数字对象 v—for的key需要用字符串或者数字代理 -->
+          <van-cell v-for="item in articles" :key="item.art_id.toString()">
             <!-- 放置元素 文章列表的循环项 无图 单图 三图 -->
             <div class="article_item">
               <!-- 标题 -->
-              <h3 class="van-ellipsis">PullRefresh下拉刷新PullRefresh下拉刷新下拉刷新下拉刷新</h3>
+              <h3 class="van-ellipsis">{{ item.title }}</h3>
+            <!-- 根据当前的封面类型type决定显示单图 三图 或无图 -->
               <!-- 三图图片 -->
-              <div class="img_box">
-                <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-                <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-                <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+              <div class="img_box" v-if="item.cover.type===3">
+                <van-image class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
               <!-- 单图模式  单图模式暂时隐藏-->
-              <!-- <div class="img_box">
-                <van-image class="w100" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-              </div> -->
+              <div class="img_box" v-if="item.cover.type===1">
+                <van-image class="w100" fit="cover" src="item.cover.images[0]" />
+              </div>
 
               <!-- 作者信息 -->
               <div class="info_box">
-                <span>你像一阵风</span>
-                <span>8评论</span>
-                <span>10分钟前</span>
+                <!-- 作者  -->
+                <span>{{item.aut_name}}</span>
+                <!-- 评论 -->
+                <span>{{item.comm_count}}</span>
+                <!-- 时间 -->
+                <span>{{item.pubdate}}</span>
+                <!-- 关闭按钮 -->
                 <span class="close">
                   <van-icon name="cross"></van-icon>
                 </span>
