@@ -7,27 +7,53 @@
   <div class="scroll-wrapper">
       <!-- 文章列表 组件 -->
       <!-- van-list组件 如果不干涉 初始化完毕 就会检测 自己距离底部的长度 如果超出了限定 就会执行 load事件 自动把绑定的loading 变成 true -->
-    <van-list v-model="upLoading" :finished="finished" @load="onLoad"></van-list>
+    <van-list v-model="upLoading" :finished="finished" finished-text="没有了哦" @load="onLoad">
+      <!-- 循环内容 -->
+      <van-cell-group>
+        <!-- 循环单元格 -->
+        <van-cell v-for="item in articles" :key="item" title="胤娟" :value="'加油'+item"></van-cell>
+      </van-cell-group>
+    </van-list>
   </div>
 </template>
 
 <script>
+
 export default {
   data () {
     return {
+
       upLoading: false, // 表示是否开启上拉加载 默认 false
-      finished: false // 表示是否已经完成 所有数据的加载
+      finished: false, // 表示是否已经完成 所有数据的加载
+      articles: [] // 文章列表内容
     }
   },
   methods: {
     onLoad () {
+      console.log('开始请求数据')
       // 如果加载状态 检测机制 高度不够 还是会自动执行 load事件 开启上拉加载
       // 如果有数据 应该把数据加载到 list 中
       // 要想关掉
-      setTimeout(() => {
-        this.finished = true // 表示数据 已经全部加载完毕 没有数据了
-      }, 1000) // 等待1秒 然后关闭 加载状态
+      // setTimeout(() => {
+      //   this.finished = true // 表示数据 已经全部加载完毕 没有数据了
+      // }, 1000) // 等待1秒 然后关闭 加载状态
+      // --------------------------------------------------------------------------------- 模拟加载数据
+      // 如果你的数据已经加载完毕 应该把finished 设置为true 表示一切已经结束了 不在请求
+      // 此时判断 如果条数大于50 说明数据加载完毕
+      // vant-list组件 第一次加载 需要让list组件 出现滚动条 如果没有滚动条 就没办法继续往下拉
+      if (this.articles.length > 50) {
+        // 如果此时数据已经大于50条
+        this.finished = true // 关闭加载 onload就不会再自动触发执行
+      } else {
+        // 1-60 ==>this.articles.length + index + 1
+        var arr = Array.from(Array(15), (value, index) => this.articles.length + index + 1)
+        // 上拉加载 不是覆盖之前的数据 而是追加到数组队尾
+        this.articles.push(...arr)
+        // 添加完成之后 需要手动关闭loading
+        this.upLoading = false
+      }
     }
+
   }
 
 }
