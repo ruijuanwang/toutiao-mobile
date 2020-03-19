@@ -104,6 +104,8 @@ export default {
       //   this.upLoading = false
       // }
       // ----------------------------------------------------------------------------------------上拉加载 真实数据
+      // await 强制等待this.$sleep() 加载完毕 才执行下面的代码
+      await this.$sleep() // 人为的控制了请求的事件
       // this.timestamp || Date.now() 表示 如果有历史时间戳 就传入历史时间戳 否则用当前的时间戳
       var result = await MyArticles({ channel_id: this.channel_id, timestamp: this.timestamp || Date.now() }) // this.channel_id 是当前的频道id
       //  获取内容
@@ -133,6 +135,8 @@ export default {
       //   this.successText = `更新了${arr.length}条数据` // 刷新完毕提示文案
       // }, 1000)
       // ----------------------------------------------------------------------------------下拉刷新 真实数据
+      // await 强制等待this.$sleep() 加载完毕 才执行下面的代码
+      await this.$sleep() // 人为的控制了请求的事件
       // 下拉刷新时间戳永远是最新的
       const result = await MyArticles({ timestamp: Date.now(), channel_id: this.channel_id })
       // 数据请求成功 手动关闭下拉刷新的状态
