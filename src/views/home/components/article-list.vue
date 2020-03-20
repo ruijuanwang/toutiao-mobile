@@ -21,14 +21,16 @@
               <h3 class="van-ellipsis">{{ item.title }}</h3>
             <!-- 根据当前的封面类型type决定显示单图 三图 或无图 -->
               <!-- 三图图片 -->
+              <!-- 图片组件是vant组件库中的图片组件 需要使用该组件 进行图片的懒加载 -->
+              <!-- lazy-load 表示开启懒加载但 必须配合 Lazyload 组件使用 该图片组件会进行懒加载 也就是只有当前屏幕出现的时候 才去加载对应的图片 -->
               <div class="img_box" v-if="item.cover.type===3">
-                <van-image class="w33" fit="cover" :src="item.cover.images[0]" />
-                <van-image class="w33" fit="cover" :src="item.cover.images[1]" />
-                <van-image class="w33" fit="cover" :src="item.cover.images[2]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
               <!-- 单图模式  单图模式暂时隐藏-->
               <div class="img_box" v-if="item.cover.type===1">
-                <van-image class="w100" fit="cover" src="item.cover.images[0]" />
+                <van-image lazy-load class="w100" fit="cover" src="item.cover.images[0]" />
               </div>
 
               <!-- 作者信息 -->
