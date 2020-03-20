@@ -38,7 +38,7 @@
                 <!-- 评论 -->
                 <span>{{item.comm_count}}</span>
                 <!-- 时间 -->
-                <span>{{item.pubdate}}</span>
+                <span>{{item.pubdate | relTime}}</span>
                 <!-- 关闭按钮 -->
                 <span class="close">
                   <van-icon name="cross"></van-icon>
