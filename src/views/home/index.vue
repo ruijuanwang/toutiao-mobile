@@ -33,7 +33,7 @@
     <!-- 反馈内容组件 -->
     <!-- 监听谁触发的自定义事件 就在谁的标签上写监听 -->
     <!-- 监听 more-action 组件触发的事件 并且去调用不感兴趣接口  -->
-    <MoreAction @dislike='dislikeArticle' ></MoreAction>
+    <MoreAction @dislike='dislikeArticle' @report='report' ></MoreAction>
   </van-popup>
   </div>
 </template>
@@ -42,7 +42,7 @@
 import ArticleList from './components/article-list' // 引入文章列表组件
 import { getMyChannels } from '@/api/channels' // 引入获取我的(匿名)频道接口
 import MoreAction from './components/more-action' // 引入反馈内容组件
-import { dislikeArticle } from '@/api/articles' // 引入对文章不感兴趣接口
+import { dislikeArticle, reportArticle } from '@/api/articles' // 引入对文章不感兴趣接口 和 举报文章接口
 import eventbus from '@/utils/eventbus' // 引入公共事件处理器
 export default {
   components: {
@@ -94,7 +94,29 @@ export default {
         // 表示失败
         // 弹出一个失败的提示 type默认红色
         this.$wnotify({
+          message: '操作失败'
+        })
+      }
+    },
+    // 举报文章
+    async report (type) {
+      // 调用举报文章接口
+      try {
+        await reportArticle({ target: this.articleId, type })
+        // await下方的逻辑 是 resolve(成功)之后执行的
+        // 弹出一个成功的提示
+        this.$wnotify({
+          type: 'success', // 成功颜色是绿色的
           message: '操作成功'
+        })
+        // 举报成功 同样也要将举报的文章删除
+        eventbus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+        this.showMoreAction = false // 删除成功 应该关闭弹层
+      } catch (error) {
+        // 表示失败
+        // 弹出一个失败的提示 type默认红色
+        this.$wnotify({
+          message: '操作失败'
         })
       }
     }

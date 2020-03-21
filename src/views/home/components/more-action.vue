@@ -13,7 +13,8 @@
     </van-cell-group>
     <!-- 单元格组 2 -->
     <van-cell-group v-else>
-      <van-cell v-for="item in reports" :key="item.value" icon="arrow-left" @click="isReport=false">{{ item.label }}</van-cell>
+        <!-- 举报文章 注册举报项的点击事件 并且传入举报类型对应的value -->
+      <van-cell @click="$emit('report',item.value)" v-for="item in reports" :key="item.value" icon="arrow-left">{{ item.label }}</van-cell>
     </van-cell-group>
   </div>
 </template>

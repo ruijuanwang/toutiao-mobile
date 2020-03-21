@@ -31,3 +31,16 @@ export function dislikeArticle (data) {
     // body参数在data中
   })
 }
+/*********
+ *
+ * 举报文章接口
+ *
+ * ***********/
+export function reportArticle (data) {
+  return request({
+    url: '/article/reports', // 地址
+    method: 'post', // 接口类型
+    data // body参数
+
+  })
+}
