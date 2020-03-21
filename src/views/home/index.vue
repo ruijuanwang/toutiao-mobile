@@ -47,7 +47,8 @@ export default {
   data () {
     return {
       channels: [], // 接收频道数据
-      showMoreAction: false // 控制反馈弹层的显示和隐藏  默认隐藏
+      showMoreAction: false, // 控制反馈弹层的显示和隐藏  默认隐藏
+      articleId: null // 用来接收 被点击的文章id
     }
   },
   methods: {
@@ -57,9 +58,12 @@ export default {
       this.channels = ruselt.channels // 将数据赋值给data中的变量
     },
     // 此方法会在 article-list组件触发  showAction的时候触发 显示弹层
-    openAction () {
+    openAction (artId) {
       // 此时应该弹出反馈的层
       this.showMoreAction = true
+      // 把传过来 当前被点击的文章 id 存起来 调用接口的时候要传出去
+      this.articleId = artId
+      alert(artId)
     }
 
   },
