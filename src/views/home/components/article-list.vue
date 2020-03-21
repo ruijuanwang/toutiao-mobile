@@ -63,7 +63,31 @@
 <script>
 import { MyArticles } from '@/api/articles' // 获取文章列表方法
 import { mapState } from 'vuex'
+import eventbus from '@/utils/eventbus' // 公共事件处理器
 export default {
+  // 初始化函数
+  created () {
+    // 监听广播的事件 有多少个article-list实例 就监听多少次
+    //  delArticle=> 假设有4个实例 就对应4个函数
+    eventbus.$on('delArticle', (artId, channelId) => {
+      // 这个位置 每个组件实例都会被触发
+      // 这里要判断一下 传递过来的频道 是否等于 自生的频道
+      if (channelId === this.channel_id) {
+        // 说明当前的这个article-list实例 就是我们要去删除数据的实例
+        const index = this.articles.findIndex(item => item.art_id.toString() === artId)
+        // 通过id查询对应文章数据所在的下标
+        if (index > -1) {
+          // 索引从0开始 所以应该大于-1
+          this.articles.splice(index, 1) // 删除对应的下标
+        }
+        // 但是如果一直删除 就会将列表数据都删光 因为没有了滚动条 他不会自动触发load事件  所有我们应该手动触发事件 请求来新的数据
+        if (this.articles.length === 0) {
+          // 说明把数据删光了
+          this.onLoad() // 手动触发onload事件 给页面加载数据
+        }
+      }
+    })
+  },
   computed: {
     ...mapState(['user']) // 将user对象映射到计算属性中
   },

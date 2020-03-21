@@ -2,7 +2,8 @@
     <!-- 首页模块home -->
   <div class="container">
    <!-- 放置tabs组件 -->
-  <van-tabs >
+   <!-- v-model绑定的是被激活页签的索引 -->
+  <van-tabs v-model="activeIndex" >
     <!-- 内部需要放置子标签 title值为标签当前显示的内容 -->
     <!-- van-tab 是vant的组件 -->
     <!-- 拿到channels频道数据之后 循环 -->
@@ -42,6 +43,7 @@ import ArticleList from './components/article-list' // 引入文章列表组件
 import { getMyChannels } from '@/api/channels' // 引入获取我的(匿名)频道接口
 import MoreAction from './components/more-action' // 引入反馈内容组件
 import { dislikeArticle } from '@/api/articles' // 引入对文章不感兴趣接口
+import eventbus from '@/utils/eventbus' // 引入公共事件处理器
 export default {
   components: {
     ArticleList, // 注册文章列表组件
@@ -51,7 +53,9 @@ export default {
     return {
       channels: [], // 接收频道数据
       showMoreAction: false, // 控制反馈弹层的显示和隐藏  默认隐藏
-      articleId: null // 用来接收 被点击的文章id
+      articleId: null, // 用来接收 被点击的文章id
+      activeIndex: 0 // 被激活的tab页签 默认是0(索引) 也就是频道的第一个
+
     }
   },
   methods: {
@@ -80,6 +84,12 @@ export default {
           type: 'success', // 成功颜色是绿色的
           message: '操作成功'
         })
+        // 应该触发一个自定义事件 利用事件广播机制 通知对应的 tab 来删除文章数据
+        // 除了要传入一个文章的id之外 还要告诉监听事件的人 现在处于哪个频道 传入频道id 也就是被激活的频道id
+        // this.channels[this.activeIndex].id //当前被激活的频道id
+        eventbus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+        // 监听了这个事件组件 就要根据id来删除数据 应该在article-list文章列表去监听$.on
+        this.showMoreAction = false // 删除成功 应该关闭弹层
       } catch (error) {
         // 表示失败
         // 弹出一个失败的提示 type默认红色
