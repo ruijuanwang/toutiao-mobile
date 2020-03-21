@@ -16,7 +16,8 @@
       </div> -->
       <!-- 有多少个van-tab标签  就有多少个article-list组件 相当于多个article-list实例 -->
       <!-- 需要将频道id传给每一个列表组件 父传子 props -->
-      <ArticleList :channel_id='item.id'></ArticleList>
+      <!--监听 article-list 触发的ArticleList事件 接收子组件自定义事件 并且显示弹层 -->
+      <ArticleList @showAction="openAction" :channel_id='item.id'></ArticleList>
     </van-tab>
   </van-tabs>
   <!-- 在tabs下放置图标 编辑频道的图标 -->
@@ -24,19 +25,29 @@
     <!-- 放置 vant图标 -->
     <van-icon name="wap-nav"></van-icon>
   </span>
+  <!-- 放置一个弹层组件 van-popup -->
+  <!-- 用单层组件 popup 来包裹我们的反馈内容组件 -->
+  <!-- 绑定一个布尔值 来控制弹层的显示隐藏 -->
+  <van-popup v-model="showMoreAction" style="width:80%">
+    <!-- 反馈内容组件 -->
+    <MoreAction></MoreAction>
+  </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list' // 引入文章列表组件
 import { getMyChannels } from '@/api/channels'
+import MoreAction from './components/more-action' // 引入反馈内容组件
 export default {
   components: {
-    ArticleList // 注册文章列表组件
+    ArticleList, // 注册文章列表组件
+    MoreAction // 注册反馈内容组件
   },
   data () {
     return {
-      channels: [] // 接收频道数据
+      channels: [], // 接收频道数据
+      showMoreAction: false // 控制反馈弹层的显示和隐藏  默认隐藏
     }
   },
   methods: {
@@ -44,6 +55,11 @@ export default {
     async getMyChannels () {
       const ruselt = await getMyChannels() // 接收返回的数据结果
       this.channels = ruselt.channels // 将数据赋值给data中的变量
+    },
+    // 此方法会在 article-list组件触发  showAction的时候触发 显示弹层
+    openAction () {
+      // 此时应该弹出反馈的层
+      this.showMoreAction = true
     }
 
   },

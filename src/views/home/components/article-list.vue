@@ -42,7 +42,13 @@
                 <!-- 时间 -->
                 <span>{{item.pubdate | relTime}}</span>
                 <!-- 关闭按钮 -->
-                <span class="close">
+                <!-- 此叉号显示 应该根据当前的登录状态来判断 如果登录了 就显示 没登录 不显示 -->
+                <!-- 1.原始方式 -->
+                <!-- <span class="close" v-if="$store.state.user.token"> -->
+                <!--2. 辅助函数的形式 -->
+                <!-- 给叉号注册点击事件 触发自定义事件 子父传值 -->
+                  <!-- @事件名="逻辑处理" 点击事件中触发一个 显示反馈的事件-->
+                <span @click="$emit('showAction')" class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
@@ -56,7 +62,11 @@
 
 <script>
 import { MyArticles } from '@/api/articles' // 获取文章列表方法
+import { mapState } from 'vuex'
 export default {
+  computed: {
+    ...mapState(['user']) // 将user对象映射到计算属性中
+  },
   // props:['channel_id'] //1. 数字符串组 接收方式
   // props 2.对象形式 可以约束传入的值 必填 传值类型
   props: {
