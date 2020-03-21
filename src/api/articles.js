@@ -18,3 +18,16 @@ export function MyArticles (params) {
     //  with_top: 1 是写死的参数
   })
 }
+/*********
+ *
+ * 不感兴趣的文章接口
+ *
+ * ***********/
+export function dislikeArticle (data) {
+  return request({
+    url: '/article/dislikes', // 地址
+    method: 'post', // 请求类型
+    data
+    // body参数在data中
+  })
+}

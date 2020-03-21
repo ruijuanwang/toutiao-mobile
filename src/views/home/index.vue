@@ -30,15 +30,18 @@
   <!-- 绑定一个布尔值 来控制弹层的显示隐藏 -->
   <van-popup v-model="showMoreAction" style="width:80%">
     <!-- 反馈内容组件 -->
-    <MoreAction></MoreAction>
+    <!-- 监听谁触发的自定义事件 就在谁的标签上写监听 -->
+    <!-- 监听 more-action 组件触发的事件 并且去调用不感兴趣接口  -->
+    <MoreAction @dislike='dislikeArticle' ></MoreAction>
   </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list' // 引入文章列表组件
-import { getMyChannels } from '@/api/channels'
+import { getMyChannels } from '@/api/channels' // 引入获取我的(匿名)频道接口
 import MoreAction from './components/more-action' // 引入反馈内容组件
+import { dislikeArticle } from '@/api/articles' // 引入对文章不感兴趣接口
 export default {
   components: {
     ArticleList, // 注册文章列表组件
@@ -63,7 +66,27 @@ export default {
       this.showMoreAction = true
       // 把传过来 当前被点击的文章 id 存起来 调用接口的时候要传出去
       this.articleId = artId
-      alert(artId)
+    },
+    // 此方法会在 more-action组件触发  dislike的时候触发 去调用接口
+    async dislikeArticle () {
+      // 调用对文章不感兴趣的接口
+      try {
+        await dislikeArticle({
+          target: this.articleId // 传入不感兴趣的文章id
+        })
+        // await下方的逻辑 是 resolve(成功)之后执行的
+        // 弹出一个成功的提示
+        this.$wnotify({
+          type: 'success', // 成功颜色是绿色的
+          message: '操作成功'
+        })
+      } catch (error) {
+        // 表示失败
+        // 弹出一个失败的提示 type默认红色
+        this.$wnotify({
+          message: '操作成功'
+        })
+      }
     }
 
   },
