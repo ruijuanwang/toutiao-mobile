@@ -33,7 +33,9 @@
     <!-- 反馈内容组件 -->
     <!-- 监听谁触发的自定义事件 就在谁的标签上写监听 -->
     <!-- 监听 more-action 组件触发的事件 并且去调用不感兴趣接口  -->
-    <MoreAction @dislike='dislikeArticle' @report='report' ></MoreAction>
+    <!-- 不喜欢文章 和 举报文章 用一个方法  -->
+    <!-- $event 是事件参数 在h5标签中 dom元素的事件参数 自定义事件中$event 就是自定义事件传出的第一个参数 -->
+    <MoreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('report',$event)"></MoreAction>
   </van-popup>
   </div>
 </template>
@@ -72,12 +74,12 @@ export default {
       this.articleId = artId
     },
     // 此方法会在 more-action组件触发  dislike的时候触发 去调用接口
-    async dislikeArticle () {
-      // 调用对文章不感兴趣的接口
+    // operateType是操作类型 如果是dislike 就是不喜欢 如果是report 就是举报
+    async dislikeOrReport (operateType, type) {
+      // 调用对文章不感兴趣的接口 或者 举报文章的接口
       try {
-        await dislikeArticle({
-          target: this.articleId // 传入不感兴趣的文章id
-        })
+        // 根据一个参数 operateType 来判断是举报还是不喜欢 来调用相对应的接口
+        operateType === 'dislike' ? await dislikeArticle({ target: this.articleId }) : await reportArticle({ target: this.articleId, type }) // 这里的type 通过 $event传出来
         // await下方的逻辑 是 resolve(成功)之后执行的
         // 弹出一个成功的提示
         this.$wnotify({
@@ -97,29 +99,29 @@ export default {
           message: '操作失败'
         })
       }
-    },
-    // 举报文章
-    async report (type) {
-      // 调用举报文章接口
-      try {
-        await reportArticle({ target: this.articleId, type })
-        // await下方的逻辑 是 resolve(成功)之后执行的
-        // 弹出一个成功的提示
-        this.$wnotify({
-          type: 'success', // 成功颜色是绿色的
-          message: '操作成功'
-        })
-        // 举报成功 同样也要将举报的文章删除
-        eventbus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
-        this.showMoreAction = false // 删除成功 应该关闭弹层
-      } catch (error) {
-        // 表示失败
-        // 弹出一个失败的提示 type默认红色
-        this.$wnotify({
-          message: '操作失败'
-        })
-      }
     }
+    // // 举报文章
+    // async report (type) {
+    //   // 调用举报文章接口
+    //   try {
+    //     await reportArticle({ target: this.articleId, type })
+    //     // await下方的逻辑 是 resolve(成功)之后执行的
+    //     // 弹出一个成功的提示
+    //     this.$wnotify({
+    //       type: 'success', // 成功颜色是绿色的
+    //       message: '操作成功'
+    //     })
+    //     // 举报成功 同样也要将举报的文章删除
+    //     eventbus.$emit('delArticle', this.articleId, this.channels[this.activeIndex].id)
+    //     this.showMoreAction = false // 删除成功 应该关闭弹层
+    //   } catch (error) {
+    //     // 表示失败
+    //     // 弹出一个失败的提示 type默认红色
+    //     this.$wnotify({
+    //       message: '操作失败'
+    //     })
+    //   }
+    // }
 
   },
   created () {
