@@ -12,3 +12,13 @@ export function getMyChannels () {
     url: '/user/channels' // 地址
   })
 }
+/*****
+ *
+ * 获取全部的频道
+ *
+ * ******/
+export function getAllChannels () {
+  return request({
+    url: '/channels'
+  })
+}

@@ -25,8 +25,9 @@
     <div class="channel">
       <div class="tit">可选频道：</div>
       <van-grid class="van-hairline--left">
-        <van-grid-item v-for="index in 8" :key="index">
-          <span class="f12">频道{{index}}</span>
+        <!-- 循环渲染可选频道 -->
+        <van-grid-item v-for="item in optionalChannels" :key="item.id">
+          <span class="f12">{{ item.name }}</span>
           <van-icon class="btn" name="plus"></van-icon>
         </van-grid-item>
       </van-grid>
@@ -35,6 +36,7 @@
 </template>
 
 <script>
+import { getAllChannels } from '@/api/channels' // 引入获取全部频道接口
 export default {
   // props接收频道数据
   // props:['channels'] // 1.字符串数组接收 用户频道数据
@@ -50,8 +52,27 @@ export default {
   },
   data () {
     return {
-      editing: false // 正在编辑状态 用这个状态来控制 是否显示删除图标
+      editing: false, // 正在编辑状态 用这个状态来控制 是否显示删除图标
+      allChannels: [] // 用来接收所有的频道数据
     }
+  },
+  methods: {
+    async getAllChannels () {
+      // 调用获取全部频道接口
+      var result = await getAllChannels()
+      this.allChannels = result.channels // 将数据赋值到data中
+    }
+  },
+  computed: {
+    // 这里用计算属性的原因是: 可选频道是一个动态的结果 全部频道数据(data中的 allChannels) - 用户频道数据(props接收的channels) =>重新计算频道数据 =>计算属性有缓存机制
+    optionalChannels () {
+      // 计算属性必须要有返回值
+      // 可选频道 = 全部频道 - 我的频道
+      return this.allChannels.filter(item => !this.channels.some(o => o.id === item.id))
+    }
+  },
+  created () {
+    this.getAllChannels() // 调用组件方法=>获取全部频道
   }
 }
 </script>
