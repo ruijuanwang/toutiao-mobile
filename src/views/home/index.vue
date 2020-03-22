@@ -44,14 +44,14 @@
     <!-- 把父组件中的 用户频道数据 传给子组件 -->
     <!-- 接收子组件触发的自定义事件 -->
     <!-- 父组件应该把被激活的 索引传给 编辑频道组件 =>添加红色样式 -->
-    <ChannelEdit @delChannel="delChannel"  :activeIndex='activeIndex' @selectChannel="selectChannel" :channels='channels'></ChannelEdit>
+    <ChannelEdit @addChannel="addChannel" @delChannel="delChannel"  :activeIndex='activeIndex' @selectChannel="selectChannel" :channels='channels'></ChannelEdit>
   </van-action-sheet>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list' // 引入文章列表组件
-import { getMyChannels, delChannel } from '@/api/channels' // 引入获取我的(匿名)频道接口 和 删除频道接口
+import { getMyChannels, delChannel, addChannel } from '@/api/channels' // 引入获取我的(匿名)频道接口 和 删除频道接口  添加频道接口
 import MoreAction from './components/more-action' // 引入反馈内容组件
 import { dislikeArticle, reportArticle } from '@/api/articles' // 引入对文章不感兴趣接口 和 举报文章接口
 import eventbus from '@/utils/eventbus' // 引入公共事件处理器
@@ -73,6 +73,13 @@ export default {
     }
   },
   methods: {
+    // 添加频道方法
+    async  addChannel (channel) {
+      // channel 是传过来要添加的频道对象
+    // 调用添加频道的接口 将频道写入缓存 成功之后 要将该频道添加到data中
+      await addChannel(channel) // 传入参数 写入缓存
+      this.channels.push(channel) // 将添加的频道添加到 data中的 channels中
+    },
     // 删除频道的方法
     async delChannel (id) {
       // 调用删除频道接口

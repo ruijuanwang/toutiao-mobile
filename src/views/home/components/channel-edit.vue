@@ -34,7 +34,8 @@
         <!-- 循环渲染可选频道 -->
         <van-grid-item v-for="item in optionalChannels" :key="item.id">
           <span class="f12">{{ item.name }}</span>
-          <van-icon class="btn" name="plus"></van-icon>
+          <!-- 添加+图标 注册点击事件 触发自定义事件 并且传出一个当前被点击的 频道对象-->
+          <van-icon @click="$emit('addChannel',item)" class="btn" name="plus"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
