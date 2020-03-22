@@ -43,7 +43,8 @@
     <!-- 放置编辑频道组件 -->
     <!-- 把父组件中的 用户频道数据 传给子组件 -->
     <!-- 接收子组件触发的自定义事件 -->
-    <Channel-edit @selectChannel="selectChannel" :channels='channels'></Channel-edit>
+    <!-- 父组件应该把被激活的 索引传给 编辑频道组件 =>添加红色样式 -->
+    <Channel-edit :activeIndex='activeIndex' @selectChannel="selectChannel" :channels='channels'></Channel-edit>
   </van-action-sheet>
   </div>
 </template>

@@ -11,12 +11,13 @@
       </div>
       <van-grid class="van-hairline--left">
         <!-- 循环渲染我的频道-->
-        <van-grid-item v-for="(item,index) in channels" :key="item.id">
+        <van-grid-item  v-for="(item,index) in channels" :key="item.id">
           <!-- 当点击用户频道项时 需要把当前被点击的 id 传出去 或者 索引 传出去-->
           <!-- 方法 1 传 id -->
           <!-- <span @click="$emit('selectChannel',item.id)" class="f12">{{ item.name }}</span> -->
           <!-- 方法 2 传 索引 -->
-          <span @click="$emit('selectChannel',index)" class="f12">{{ item.name }}</span>
+          <!--  :class 激活选中频道 class样式为红色 -->
+          <span @click="$emit('selectChannel',index)" :class="{red:index===activeIndex}" class="f12">{{ item.name }}</span>
           <!-- 叉号标签应该在 进入编辑状态的时候才显示 在退出编辑状态(也就是在完成状态)的时候不显示 -->
           <!-- 因为第一个永远不显示叉号 因为推荐不能被删除 所以说条件应该加一个 索引不能等于0-->
           <van-icon v-if='index!==0 && editing' class="btn" name="cross"></van-icon>
@@ -51,6 +52,12 @@ export default {
       required: true, // 表示必须填channels
       type: Array, // 接收数组类型
       default: () => [] // 默认值 给一个空数组 此函数表示 默认返回一个空数组
+    },
+    // 接收被激活的频道 索引
+    activeIndex: {
+      required: true,
+      type: Number,
+      default: 0
     }
 
   },
