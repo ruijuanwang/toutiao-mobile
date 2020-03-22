@@ -10,9 +10,12 @@
         <van-button v-else @click="editing=false" size="mini" type="danger" plain>完成</van-button>
       </div>
       <van-grid class="van-hairline--left">
-        <van-grid-item v-for="index in 8" :key="index">
-          <span class="f12">频道{{index}}</span>
-          <van-icon class="btn" name="cross"></van-icon>
+        <!-- 循环渲染我的频道-->
+        <van-grid-item v-for="(item,index) in channels" :key="item.id">
+          <span class="f12">{{ item.name }}</span>
+          <!-- 叉号标签应该在 进入编辑状态的时候才显示 在退出编辑状态(也就是在完成状态)的时候不显示 -->
+          <!-- 因为第一个永远不显示叉号 因为推荐不能被删除 所以说条件应该加一个 索引不能等于0-->
+          <van-icon v-if='index!==0 && editing' class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -33,6 +36,18 @@
 
 <script>
 export default {
+  // props接收频道数据
+  // props:['channels'] // 1.字符串数组接收 用户频道数据
+  // 2.对象形式 接收 用户频道数据
+  props: {
+    channels: {
+      // 三个配置项: 1.required 必传  2.type 类型  3.default 默认值
+      required: true, // 表示必须填channels
+      type: Array, // 接收数组类型
+      default: () => [] // 默认值 给一个空数组 此函数表示 默认返回一个空数组
+    }
+
+  },
   data () {
     return {
       editing: false // 正在编辑状态 用这个状态来控制 是否显示删除图标
