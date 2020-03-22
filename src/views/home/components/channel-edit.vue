@@ -20,7 +20,8 @@
           <span @click="$emit('selectChannel',index)" :class="{red:index===activeIndex}" class="f12">{{ item.name }}</span>
           <!-- 叉号标签应该在 进入编辑状态的时候才显示 在退出编辑状态(也就是在完成状态)的时候不显示 -->
           <!-- 因为第一个永远不显示叉号 因为推荐不能被删除 所以说条件应该加一个 索引不能等于0-->
-          <van-icon v-if='index!==0 && editing' class="btn" name="cross"></van-icon>
+          <!-- 删除频道 点击叉号 应该调用父组件的的删除方法 传出当前被点击 删除的id 子传父  -->
+          <van-icon @click="$emit('delChannel',item.id)" v-if='index!==0 && editing' class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
