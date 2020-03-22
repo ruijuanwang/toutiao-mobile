@@ -42,7 +42,8 @@
   <van-action-sheet v-model="showChannelEdit" :round="false" title="频道管理">
     <!-- 放置编辑频道组件 -->
     <!-- 把父组件中的 用户频道数据 传给子组件 -->
-    <Channel-edit :channels='channels'></Channel-edit>
+    <!-- 接收子组件触发的自定义事件 -->
+    <Channel-edit @selectChannel="selectChannel" :channels='channels'></Channel-edit>
   </van-action-sheet>
   </div>
 </template>
@@ -71,6 +72,20 @@ export default {
     }
   },
   methods: {
+    // 方法 1
+    // 当编辑频道子组件 触发selectChannels事件时 触发该方法
+    // selectChannel (id) {
+    //   // 拿到id 找到id对应的频道的索引
+    //   const index = this.channels.findIndex(item => item.id === id) // 找到索引
+    //   this.activeIndex = index // 把被点击的频道索引赋值给 当前被激活的 标签
+    //   this.showChannelEdit = false // 关闭编辑频道的弹层
+    // },
+    // 方法 2
+    // 当编辑频道子组件 触发selectChannels事件时 触发该方法
+    selectChannel (index) {
+      this.activeIndex = index // 把被点击的频道索引赋值给 当前被激活的 标签
+      this.showChannelEdit = false // 关闭编辑频道的弹层
+    },
     // 获取频道数据方法
     async getMyChannels () {
       const ruselt = await getMyChannels() // 接收返回的数据结果

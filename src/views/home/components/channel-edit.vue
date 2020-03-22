@@ -12,7 +12,11 @@
       <van-grid class="van-hairline--left">
         <!-- 循环渲染我的频道-->
         <van-grid-item v-for="(item,index) in channels" :key="item.id">
-          <span class="f12">{{ item.name }}</span>
+          <!-- 当点击用户频道项时 需要把当前被点击的 id 传出去 或者 索引 传出去-->
+          <!-- 方法 1 传 id -->
+          <!-- <span @click="$emit('selectChannel',item.id)" class="f12">{{ item.name }}</span> -->
+          <!-- 方法 2 传 索引 -->
+          <span @click="$emit('selectChannel',index)" class="f12">{{ item.name }}</span>
           <!-- 叉号标签应该在 进入编辑状态的时候才显示 在退出编辑状态(也就是在完成状态)的时候不显示 -->
           <!-- 因为第一个永远不显示叉号 因为推荐不能被删除 所以说条件应该加一个 索引不能等于0-->
           <van-icon v-if='index!==0 && editing' class="btn" name="cross"></van-icon>
