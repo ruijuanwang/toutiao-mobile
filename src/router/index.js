@@ -46,7 +46,7 @@ const routes = [
     path: '/search',
     component: search // 搜索中心 一级路由组件
   }, {
-    path: '/result',
+    path: '/search/result',
     component: searchresult // 搜索结果 一级路由组件
   }, {
     path: '/article',
