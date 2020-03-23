@@ -44,3 +44,15 @@ export function reportArticle (data) {
 
   })
 }
+/*****
+ *
+ * 获取联想搜索建议
+ *@params 参数 搜索内容
+ *
+ * *****/
+export function getSuggestion (params) {
+  return request({
+    url: '/suggestion', // 地址
+    params // query 参数放在 params中
+  })
+}

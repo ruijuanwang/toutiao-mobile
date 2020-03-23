@@ -9,8 +9,9 @@
     <van-search @search='onSearch' v-model="q" placeholder="请输入搜索关键词" shape="round" />
     <!-- 联想内容  有输入内容时 显示联想  没有输入内容时 显示历史记录-->
     <van-cell-group class="suggest-box"  v-if="q" >
-      <van-cell icon="search">
-        <span>j</span>ava
+      <!-- 循环渲染联想建议数据 -->
+      <van-cell v-for="item in suggestList" :key="item.id" icon="search">
+        {{ item }}
       </van-cell>
     </van-cell-group>
     <!-- 历史记录部分  你搜索的内容 会在这里记录 -->
@@ -38,6 +39,7 @@
 </template>
 
 <script>
+import { getSuggestion } from '@/api/articles' // 引入搜索联想建议的接口
 const key = 'toutiao-history' // 此 key 作为历史记录在本地缓存中的key
 export default {
   name: 'search',
@@ -45,7 +47,8 @@ export default {
     return {
       q: '', // 搜索关键字的内容
       // 当data初始化的时候 会读取后面的数据
-      historyList: JSON.parse(localStorage.getItem(key) || '[]') // 接收搜索历史记录数据
+      historyList: JSON.parse(localStorage.getItem(key) || '[]'), // 接收搜索历史记录数据
+      suggestList: [] // 放置联想建议的数据
     }
   },
   methods: {
@@ -89,6 +92,43 @@ export default {
       localStorage.setItem(key, JSON.stringify(this.historyList)) // 历史记录同步本地缓存中
       // 搜索事件触发的时候 应该跳到 搜索结果页 并且携带参数(搜索内容)
       this.$router.push({ path: '/search/result', query: { q: this.q } })
+    }
+  },
+  watch: {
+    // 监听data中q的改变 显示联想建议
+    //   // 1.防抖函数做法
+    // q () {
+    //   clearTimeout(this.timer) // 先清除定时器
+    //   this.timer = setTimeout(async () => {
+    //     // 需要判断 当前清空的时候 不能发送请求 但是要把联想建议清空
+    //     if (!this.q) { // 如果这时 搜索关键字没有内容
+    //       this.suggestList = []
+    //       return // 直接return 不能继续
+    //     }
+    //     // 此时函数中 需要 调用联想建议接口
+    //     // 联想搜索建议 需要放置在变量中 this.suggestList
+    //     const result = await getSuggestion({ q: this.q }) // params参数
+    //     this.suggestList = result.options // 将返回来的词条options 赋值到data数据中
+    //   }, 300)
+    // }
+    // 2.节流函数做法
+    q () {
+      if (!this.timer) {
+        // 要求三百毫秒执行一次
+        this.timer = setTimeout(async () => {
+          // 先将标记设置为空
+          this.timer = null
+          // 需要判断 当前清空的时候 不能发送请求 但是要把联想建议清空
+          if (!this.q) { // 如果这时 搜索关键字没有内容
+            this.suggestList = []
+            return // 直接return 不能继续
+          }
+          // 此时函数中 需要 调用联想建议接口
+          // 联想搜索建议 需要放置在变量中 this.suggestList
+          const result = await getSuggestion({ q: this.q }) // params参数
+          this.suggestList = result.options // 将返回来的词条options 赋值到data数据中
+        }, 300)
+      }
     }
   }
   // created () {
