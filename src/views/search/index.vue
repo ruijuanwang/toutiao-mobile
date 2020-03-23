@@ -10,7 +10,8 @@
     <!-- 联想内容  有输入内容时 显示联想  没有输入内容时 显示历史记录-->
     <van-cell-group class="suggest-box"  v-if="q" >
       <!-- 循环渲染联想建议数据 -->
-      <van-cell v-for="item in suggestList" :key="item.id" icon="search">
+      <!-- 注册点击联想建议事件 跳转搜索结果页 并且携带参数-->
+      <van-cell @click="toResult(item)" v-for="item in suggestList" :key="item.id" icon="search">
         {{ item }}
       </van-cell>
     </van-cell-group>
@@ -26,7 +27,7 @@
       <van-cell-group>
         <!-- 需要变成动态的 循环渲染历史记录 -->
         <!-- 绑定点击历史记录事件 跳搜索结果页  -->
-        <van-cell @click="toSearchResult(item)" v-for="(item,index) in historyList" :key="index">
+        <van-cell @click="toResult(item)" v-for="(item,index) in historyList" :key="index">
           <!-- 显示循环内容 -->
           <a class="word_btn">{{ item }}</a>
           <!-- 注册点击叉号删除历史记录的事件 -->
@@ -58,13 +59,24 @@ export default {
       this.historyList.splice(index, 1) // 删除对应索引的历史记录
       localStorage.setItem(key, JSON.stringify(this.historyList)) // 存入本地缓存
     },
-    // 点击历史记录 跳转到搜索结果页
-    toSearchResult (text) {
-      // this.$router 路由对象的实例
-      // this.$route 当前的路由页面对象信息 有当前的地址 params参数 query参数 fullPath 完整地址 等
-      // 路由传参 params query
-      // this.$router.push('/search/result?q=' + text) // 1.采用query传参 地址拼接参数
-      this.$router.push({ path: '/search/result', query: { q: text } }) // 2.采用 query 对象传参
+    // // 点击历史记录 跳转到搜索结果页 =>和 toResult 方法合并了
+    // toSearchResult (text) {
+    //   // this.$router 路由对象的实例
+    //   // this.$route 当前的路由页面对象信息 有当前的地址 params参数 query参数 fullPath 完整地址 等
+    //   // 路由传参 params query
+    //   // this.$router.push('/search/result?q=' + text) // 1.采用query传参 地址拼接参数
+    //   this.$router.push({ path: '/search/result', query: { q: text } }) // 2.采用 query 对象传参
+    // },
+    // 去搜索结果页  (点击联想建议 和 点击历史记录 共用一个方法)
+    toResult (text) {
+      // 把text放入 历史记录
+      this.historyList.push(text)
+      // 有可能重复 去重
+      this.historyList = Array.from(new Set(this.historyList))
+      // 同步到本地缓存
+      localStorage.setItem(key, JSON.stringify(this.historyList))
+      // 跳转到搜索结果 携带 query参数
+      this.$router.push({ path: '/search/result', query: { q: text } })
     },
     // 清空历史记录
     async  clear () {
