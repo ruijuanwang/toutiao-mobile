@@ -31,6 +31,8 @@
         &nbsp;&nbsp;&nbsp;&nbsp;
         <van-button round size="small" :class="{ active: article.attitude ===0}" plain icon="delete">不喜欢</van-button>
       </div>
+    <!-- 文章评论组件 为何放这里 因为这里有 padding -->
+    <Comment></Comment>
     </div>
     <!-- 放一个遮罩层 获取文章详情时应该打开 获取完毕应该关闭-->
     <van-overlay class="loading-container" :show="loading">
@@ -43,7 +45,11 @@
 <script>
 import { getArticleInfo } from '@/api/articles' // 引入获取文章详情接口
 import { followUser, unfollowUser } from '@/api/user' // 关注用户 和 取消关注用户的接口
+import Comment from './components/comment' // 引入文章评论的组件
 export default {
+  components: {
+    Comment // 注册文章评论组件
+  },
   data () {
     return {
       article: {}, // 用来接收文章详情数据
@@ -125,6 +131,7 @@ export default {
     position:sticky;
     background-color: #fff;
     top:46px;
+    z-index: 2;
     .text {
       flex: 1;
       padding-left: 10px;
