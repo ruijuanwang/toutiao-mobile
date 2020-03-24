@@ -32,7 +32,7 @@
         <van-button round size="small" :class="{ active: article.attitude ===0}" plain icon="delete">不喜欢</van-button>
       </div>
     <!-- 文章评论组件 为何放这里 因为这里有 padding -->
-    <Comment></Comment>
+    <Comment/>
     </div>
     <!-- 放一个遮罩层 获取文章详情时应该打开 获取完毕应该关闭-->
     <van-overlay class="loading-container" :show="loading">

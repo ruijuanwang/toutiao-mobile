@@ -77,3 +77,19 @@ export function getArticleInfo (artId) {
     url: `/articles/${artId}` // 地址
   })
 }
+/******
+ *
+ * 获取文章评论 或者 文章评论的回复
+ *
+ * @params 参数
+ *  type  表示 获取 a文章的评论  还是 c评论的回复
+ *  source 表示 获取a文章的id还是 c评论的id
+ *  offset 偏移量=>分页依据, 要获取下一页的数据 要传上一页的最后一个id...
+ *
+ * ********/
+export function getComments (params) {
+  return request({
+    url: '/comments', // 地址
+    params // query参数 包括 type  source  offset
+  })
+}
