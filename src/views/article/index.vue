@@ -5,29 +5,54 @@
     <!-- @click-left 点击左侧事件  $router.back()=$router.go(-1)-->
     <van-nav-bar fixed @click-left='$router.back()' title="文章详情" left-arrow></van-nav-bar>
      <div class="detail">
-      <h3 class="title">文章的标题</h3>
+       <!-- 文章标题 -->
+      <h3 class="title">{{ article.title}}</h3>
       <div class="author">
-        <van-image round width="1rem" height="1rem" fit="fill" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+        <van-image round width="1rem" height="1rem" fit="fill" :src="article.aut_photo" />
         <div class="text">
-          <p class="name">一阵清风</p>
-          <p class="time">两周内</p>
+          <!-- 作者名字 -->
+          <p class="name">{{ article.aut_name }}</p>
+          <!-- 时间 使用过滤器=>转相对时间 -->
+          <p class="time">{{ article.pubdate  | relTime }}</p>
         </div>
-        <van-button round size="small" type="info">+ 关注</van-button>
+        <!-- 关注 需要判断一下 根据 is_followed 判断 他是一个布尔值 -->
+        <van-button round size="small" type="info">{{ article.is_followed ? "关注" : "+ 关注" }}</van-button>
       </div>
       <div class="content">
-        <p>文章的内容</p>
+        <!-- 文章内容 是带标签 带属性 带样式的 将标签设置到对应的元素中 用 v-html-->
+        <p v-html="article.content"></p>
       </div>
       <div class="zan">
-        <van-button round size="small" class="active" plain icon="like-o">点赞</van-button>
+        <!-- 需要根据 当前的态度 决定谁拥有 active 样式 -->
+        <!-- 用户对文章的态度, -1: 无态度，0-不喜欢，1-点赞 -->
+        <van-button round size="small" :class="{ active: article.attitude ===1}"  plain icon="like-o">点赞</van-button>
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <van-button round size="small" plain icon="delete">不喜欢</van-button>
+        <van-button round size="small" :class="{ active: article.attitude ===0}" plain icon="delete">不喜欢</van-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { getArticleInfo } from '@/api/articles' // 引入获取文章详情接口
 export default {
+  data () {
+    return {
+      article: {} // 用来接收文章详情数据
+    }
+  },
+  methods: {
+    // 获取文章详情数据的方法
+    async  getArticleInfo () {
+      // 获取地址参数
+      const { artId } = this.$route.query // 从当前页的路由信息对象 解构出 query参数
+      this.article = await getArticleInfo(artId) // 调用文章详情接口 并把 得到的文章详情数据 直接 赋值给 data变量中
+    }
+  },
+  created () {
+    // 钩子函数中 去调用文章详情
+    this.getArticleInfo()
+  }
 
 }
 </script>

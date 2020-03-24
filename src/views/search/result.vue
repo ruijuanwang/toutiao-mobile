@@ -9,7 +9,8 @@
     <van-list v-model="upLoading" :finished="finished" @load="onLoad">
       <van-cell-group>
     <!-- 文章列表结构 -->
-        <van-cell v-for="item in articles" :key="item.art_id.toString()">
+          <!-- van-cell 组件有个 to 属性 同router-link 中的 to=>我们应该点击搜索结果文章时跳转到 文章详情页 并且携带当前的 文章id -->
+        <van-cell :to="`/article?artId=${item.art_id.toString()}`" v-for="item in articles" :key="item.art_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{ item.title }}</h3>
             <div class="img_box" v-if="item.cover.type===3">

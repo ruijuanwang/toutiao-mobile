@@ -14,7 +14,8 @@
         <van-cell-group>
           <!-- 循环单元格 -->
           <!-- item.art_id 是一个大数字对象 v—for的key需要用字符串或者数字代理 -->
-          <van-cell v-for="item in articles" :key="item.art_id.toString()">
+          <!-- van-cell 组件有个 to 属性 同router-link 中的 to=>我们应该点击文章时跳转到 文章详情页 并且携带当前的 文章id -->
+          <van-cell :to="`/article?artId=${item.art_id.toString()}`" v-for="item in articles" :key="item.art_id.toString()">
             <!-- 放置元素 文章列表的循环项 无图 单图 三图 -->
             <div class="article_item">
               <!-- 标题 -->
@@ -48,7 +49,8 @@
                 <!--2. 辅助函数的形式 -->
                 <!-- 给叉号注册点击事件 触发自定义事件 子父传值 -->
                   <!-- @事件名="逻辑处理" 点击事件中触发一个 显示反馈的事件  并且传入当前被点击的文章id-->
-                <span @click="$emit('showAction',item.art_id.toString())" class="close" v-if="user.token">
+                  <!-- stop 阻止冒泡 因为父组件 点击文章会跳转页面 -->
+                <span @click.stop="$emit('showAction',item.art_id.toString())" class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
