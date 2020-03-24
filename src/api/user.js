@@ -18,3 +18,26 @@ export function login (data) {
   })
 //   返回一个promise对象
 }
+/***********
+ *
+ * 关注用户
+ *
+ * ************/
+export function followUser (data) {
+  return request({
+    url: '/user/followings', // 地址
+    method: 'post', // 请求类型
+    data // body 参数 用户的 id
+  })
+}
+/***********
+ *
+ * 取消关注用户
+ *
+ * ************/
+export function unfollowUser (autid) {
+  return request({
+    url: `/user/followings/${autid}`, // 地址 携带参数 用户的id
+    method: 'delete' // 请求类型
+  })
+}
