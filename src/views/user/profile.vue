@@ -11,15 +11,15 @@
           height="1.5rem"
           fit="cover"
           round
-          src="https://img.yzcdn.cn/vant/cat.jpeg"
+          :src="user.photo"
         />
       </van-cell>
       <!-- 用户昵称 点击用户昵称 弹出层 双向绑定-->
-      <van-cell v-model="user.name" @click="showName=true" is-link title="名称" value="用户名称" />
+      <van-cell @click="showName=true" is-link title="名称" :value="user.name" />
       <!-- 性别 -->
-      <van-cell is-link title="性别" value='男'/>
+      <van-cell @click="showGender=true" is-link title="性别" :value="user.gender === 0 ? '男':'女'"/>
       <!-- 生日 -->
-      <van-cell is-link title="生日" value="2019-08-08" />
+      <van-cell @click="showDate" is-link title="生日" :value="user.birthday" />
     </van-cell-group>
     <!-- 弹层组件 -->
     <!-- 1.用户头像 弹层 -->
@@ -37,7 +37,8 @@
     </van-popup>
     <!-- 3.用户性别 弹层 -->
     <!-- 使用上拉菜单组件 actions绑定一个数组-->
-    <van-action-sheet v-model="showGender" :actions="actions" cancel-text="取消"/>
+    <!-- select 方法 选中选项时触发 -->
+    <van-action-sheet @select="selectItem" v-model="showGender" :actions="actions" cancel-text="取消"/>
     <!-- 4.用户生日 弹层 -->
     <van-popup v-model="showBirthDay" position="bottom">
       <!-- 选择出生日期  出生日期应该小于现在时间-->
@@ -47,12 +48,16 @@
       type="date"
       :min-date="minDate"
       :max-date='maxDate'
+      @cancel="showBirthDay=false"
+      @confirm="confirmDate"
       />
     </van-popup>
   </div>
 </template>
 
 <script>
+import dayjs from 'dayjs' // 引入dayjs插件
+import { getUserProfile } from '@/api/user' // 引入获取个人资料的方法
 export default {
   data () {
     return {
@@ -85,7 +90,33 @@ export default {
       // 说明满足要求
       this.nameMsg = '' // 错误提示消息置为空
       this.showName = false // 关闭弹层
+    },
+    // 选择性别时触发 该方法
+    selectItem (item, index) {
+      // 有两个参数 item 每一项 index 索引 通过index就可以知道点击是男是女
+      this.user.gender = index // 索引赋值到当前数据中 0是男 1是女
+      this.showGender = false // 关闭性别弹层
+    },
+    // 显示生日日期弹层
+    showDate () {
+      this.showBirthDay = true // 显示日期弹层
+      // 将当前的生日 设置到 选择日期的当前时间 将生日字符串current 装化成 Date对象 绑定到日期组件上 (日期组件的类型是Date)
+      this.currentDate = new Date(this.user.birthday)
+    },
+    // 确定生日日期时触发
+    confirmDate () {
+      // 当前选择的生日就是 currentDate
+      // 要把选择的 Date格式的新日期 设置到 data数据中 user.birthday(字符串格式) 中
+      this.user.birthday = dayjs(this.currentDate).format('YYYY-MM-DD') // 将Date类型转化 字符串
+      this.showBirthDay = false // 关闭弹层
+    },
+    // 获取用户个人资料
+    async getUserProfile () {
+      this.user = await getUserProfile()
     }
+  },
+  created () {
+    this.getUserProfile() // 获取用户个人资料
   }
 
 }
