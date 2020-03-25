@@ -4,7 +4,7 @@
     <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存" ></van-nav-bar>
     <van-cell-group>
       <!-- 用户头像 -->
-      <van-cell is-link title="头像"  center>
+      <van-cell  @click="showPhoto=true" is-link title="头像"  center>
         <van-image
           slot="default"
           width="1.5rem"
@@ -25,7 +25,8 @@
     <!-- 1.用户头像 弹层 -->
     <!-- a.本地照片  b.拍照 -->
     <van-popup v-model="showPhoto" style="width:80%">
-      <van-cell is-link title="本地照片"></van-cell>
+      <!-- 点击本地照片 要弹出我们隐藏的 input:file 用来上传头像 -->
+      <van-cell @click="openFileDialog" is-link title="本地照片"></van-cell>
       <van-cell is-link title="拍照"></van-cell>
     </van-popup>
     <!-- 2.用户昵称 弹层  禁用点击遮罩自动关闭弹层-->
@@ -52,12 +53,16 @@
       @confirm="confirmDate"
       />
     </van-popup>
+    <!-- 准备一个 file类型的input标签 用来上传头像 隐藏掉 不能看到 -->
+    <!-- vue 中可以通过 ref 来获取dom对象 -->
+    <!-- 选择了文件 就会触发 input 的change事件 -->
+    <input @change="upload" ref="myFile" type="file" style="display:none" />
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件
-import { getUserProfile } from '@/api/user' // 引入获取个人资料的方法
+import { getUserProfile, updatePhoto } from '@/api/user' // 引入获取个人资料  上传头像 接口
 export default {
   data () {
     return {
@@ -113,6 +118,21 @@ export default {
     // 获取用户个人资料
     async getUserProfile () {
       this.user = await getUserProfile()
+    },
+    // 点击 本地相册  会选择本地文件 触发 input:file 的动作
+    openFileDialog () {
+      // 获取 dom 元素对象
+      this.$refs.myFile.click() // 触发input:file 的click事件  触发事件就会弹出 上传文件对话框
+    },
+    // 点击上传头像事件
+    async upload (params) {
+      // 此时应该获取图片信息 调用接口 formData 类型的
+      // console.log(params.target.files[0]) // 是当前上传的图片文件的信息  或者 用this.$refs.myFile.file[0] 也能获取到
+      const data = new FormData() // 实例化对象
+      data.append('photo', params.target.files[0]) // 第二个参数是选择的 图片文件信息
+      const result = await updatePhoto(data) // 调上传头像接口
+      this.user.photo = result.photo // 把成功上传的头像地址 赋值给当前data 中的photo
+      this.showPhoto = false // 关闭头像弹层
     }
   },
   created () {
