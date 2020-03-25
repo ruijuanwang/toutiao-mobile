@@ -1,7 +1,8 @@
 <template>
   <!-- 编辑资料组件 -->
  <div class="container">
-    <van-nav-bar left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存" ></van-nav-bar>
+   <!-- 绑定一个点击右侧按钮 的事件 用来保存当前修改的用户信息 -->
+    <van-nav-bar @click-right="saveUser" left-arrow @click-left="$router.back()" title="编辑资料" right-text="保存" ></van-nav-bar>
     <van-cell-group>
       <!-- 用户头像 -->
       <van-cell  @click="showPhoto=true" is-link title="头像"  center>
@@ -62,7 +63,7 @@
 
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件
-import { getUserProfile, updatePhoto } from '@/api/user' // 引入获取个人资料  上传头像 接口
+import { getUserProfile, updatePhoto, saveUserInfo } from '@/api/user' // 引入获取个人资料  上传头像  保存修改信息 接口
 export default {
   data () {
     return {
@@ -133,6 +134,16 @@ export default {
       const result = await updatePhoto(data) // 调上传头像接口
       this.user.photo = result.photo // 把成功上传的头像地址 赋值给当前data 中的photo
       this.showPhoto = false // 关闭头像弹层
+    },
+    // 点击保存时触发 用来保存用户信息 调用接口
+    async saveUser () {
+      try {
+        // 调接口 传参数
+        this.user = await saveUserInfo(this.user) // 直接将数据信息赋值给data 数据中
+        this.$wnotify({ type: 'success', message: '保存成功' })
+      } catch (error) {
+        this.$wnotify({ message: '保存失败' })
+      }
     }
   },
   created () {

@@ -72,3 +72,15 @@ export function updatePhoto (data) {
     data // body参数
   })
 }
+/******
+ *
+ * 编辑用户个人资料 保存时调用该接口
+ *
+ * **********/
+export function saveUserInfo (data) {
+  return request({
+    url: '/user/profile',
+    method: 'patch',
+    data: { ...data, photo: null } // 直接将头像置为空
+  })
+}
