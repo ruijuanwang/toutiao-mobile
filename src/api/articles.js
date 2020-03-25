@@ -93,3 +93,15 @@ export function getComments (params) {
     params // query参数 包括 type  source  offset
   })
 }
+/********
+ *
+ * 评论 或者 回复评论的接口  支持两种场景 1.文章评论 2.评论的回复
+ *
+ * ************/
+export function commentOrReply (data) {
+  return request({
+    url: '/comments',
+    method: 'post',
+    data // body参数  评论的id  评论的内容 conent  对评论回复时要传art_id (对文章评论不用传此参数)
+  })
+}

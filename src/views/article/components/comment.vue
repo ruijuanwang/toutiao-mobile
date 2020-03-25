@@ -36,15 +36,18 @@
     </van-list>
     <!-- 底部输入框  用来输入评论的-->
     <div class="reply-container van-hairline--top">
-        <!-- v-model="value" 绑定了评论的内容 -->
-      <van-field v-model="value" placeholder="写评论...">
+        <!-- v-model="value" 绑定了评论的内容   不论是 对文章评论还是对评论评论 都是用的一个输入框  输入内容去掉两边的空格 -->
+      <van-field v-model.trim="value" placeholder="写评论...">
         <van-loading v-if="submiting" slot="button" type="spinner" size="16px"></van-loading>
-        <span class="submit" v-else slot="button">提交</span>
+        <!-- 要么显示提交 如果点击了提交 首先 先把 提交按钮隐藏 这样做的目的是 防止重复提交 -->
+        <!-- 由于点击过快 会连续触发 两次事件 接口是异步的 会造成两次评论 -->
+        <span @click="submit" class="submit" v-else slot="button">提交</span>
       </van-field>
     </div>
     <!-- 放置 评论的回复的组件 弹出面板 用 van-action-sheet上拉组件 包裹 -->
     <!-- v-model 用来控制 弹出面板的显示和关闭 -->
-    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+    <!-- 关闭面板时 应该把评论的commintId 设置为空 因为我们要用它来判断 此时是要对文章评论 还是对评论回复 因为他们两个用了同一个 输入框 -->
+    <van-action-sheet @close='reply.commentId=null' v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
         <!-- 列表组件 -->
         <!-- :immediate-check 关闭第一次自动加载load的事件 -->
       <van-list @load="getReply" :immediate-check="false" v-model="reply.loading" :finished="reply.finished" finished-text="没有更多了">
@@ -67,7 +70,7 @@
 </template>
 
 <script>
-import { getComments } from '@/api/articles' // 引入获取评论的接口
+import { getComments, commentOrReply } from '@/api/articles' // 引入获取评论的接口  和 提交评论的接口
 export default {
   data () {
     return {
@@ -93,6 +96,64 @@ export default {
     }
   },
   methods: {
+    // 提交评论的方法
+    async  submit () {
+      // 点击提交的时候需要判断 用户有没有登录 如果没有登录 不能评论
+      if (this.$store.state.user.token) {
+        // 1.有token 说明用户登录了
+        // 判断输入框有没有输入内容 没有内容 直接返回
+        if (!this.value) return false// 没有内容 直接return
+        this.submiting = true // 打开提交状态 表示正在提交中 避免重复多次提交 只有当提交完毕之后 才关闭状态
+        // 休眠函数 来控制执行的速度
+        await this.$sleep(500)// 强制休眠800毫秒
+        try {
+          // 提交评论的核心内容
+          // 说明有输入的评论内容 需要调用接口
+        // 需要 通过this.reply.commentId 来判断当前 接口中target 参数 要传入哪个id
+          const result = await commentOrReply({
+            target: this.reply.commentId ? this.reply.commentId : this.$route.query.artId, // 判断 要传入的是文章id 还是评论的的id
+            content: this.value, // 评论的内容
+            art_id: this.reply.commentId ? this.$route.query.artId : null // 如果是评论的回复 就需要传出文章的id 需要穿该评论属于哪个文章 如果是对文章评论 不传此参数
+          })
+          // 调用成功之后 添加评论数据 直接添加到我们的 data中的 评论列表数据中
+          // 两种状态 1.文章评论 2.评论的回复
+          if (this.reply.commentId) {
+            // 如果id存在
+            // 说明提交的是评论的回复 我们要添加到评论数据中 从前添加
+            this.reply.list.unshift(result.new_obj) // 后端会返回一条我们刚刚添加进去的 评论数据对象 new_obj 我们应该添加到数据中
+            //  如果是对评论的回复我们应该 找到对应的评论id 将评论id的 回复数 +1
+            const comment = this.comments.find(item => item.com_id.toString() === this.reply.commentId)// 寻找 文章评论中 等于当前 评论id的id
+            comment && comment.reply_count++ // 如果找到了 就将恢复数量 +1
+          } else {
+            // 说明是对文章的评论 我们也应该 从前追加进去
+            this.comments.unshift(result.new_obj) // 后端会返回一条我们刚刚添加进去的 评论数据对象 new_obj 我们应该添加到数据中
+          }
+          // 清空输入框
+          this.value = ''
+        } catch (error) {
+          this.$wnotify({ message: '评论失败' })
+        }
+        this.submiting = false // 关闭提交状态
+      } else {
+        try {
+          // 2.否则用户没登录
+        // 告诉用户 要评论 应该去登录 如果放弃 那就点击取消
+          await this.$dialog.confirm({
+            message: '如果要评论，请先登录'
+          })
+          // fullPath 是完整地址 /article?artId=123   path是不带参数的地址 /article
+          // 表示用户点击了确定 我们应该 跳到登录页 并且传入当前的地址 当用户登录成功时 直接跳转回当前页
+          this.$router.push({
+            path: '/login', // 登录页地址
+            query: {
+              redirectUrl: this.$route.fullPath // 当前页的完整地址 带参数 用于登录成功跳转的
+            }
+          })
+        } catch (error) {
+          // 表示点击了取消
+        }
+      }
+    },
     //   点击回复 打开面板的方法
     openReply (commentId) {
       this.showReply = true // 打开评论的回复面板
