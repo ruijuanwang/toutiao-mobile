@@ -41,3 +41,13 @@ export function unfollowUser (autid) {
     method: 'delete' // 请求类型
   })
 }
+/********
+ *
+ * 获取用户自己的个人信息
+ *
+ * **********/
+export function getUserInfo () {
+  return request({
+    url: '/user'
+  })
+}
