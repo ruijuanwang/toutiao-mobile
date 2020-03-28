@@ -3,7 +3,7 @@
   <div class="container">
    <!-- 放置tabs组件 -->
    <!-- v-model绑定的是被激活页签的索引 -->
-  <van-tabs v-model="activeIndex" >
+  <van-tabs @change="changeTab" v-model="activeIndex" >
     <!-- 内部需要放置子标签 title值为标签当前显示的内容 -->
     <!-- van-tab 是vant的组件 -->
     <!-- 拿到channels频道数据之后 循环 -->
@@ -150,7 +150,7 @@ export default {
           message: '操作失败'
         })
       }
-    }
+    },
     // // 举报文章
     // async report (type) {
     //   // 调用举报文章接口
@@ -174,6 +174,12 @@ export default {
     //   }
     // }
 
+    // tab页切换时 发出广播
+    changeTab () {
+      // 切换页签时 要广播一个消息 让对应的页签 中的文章列表 去滚动滚动条
+      // 广播中传出一个参数 传出当前谁被激活了 当前激活索引频道的id
+      eventbus.$emit('changeTab', this.channels[this.activeIndex].id)
+    }
   },
   created () {
     // 直接获取频道数据

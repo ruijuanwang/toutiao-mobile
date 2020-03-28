@@ -4,7 +4,8 @@
   <!-- van-list 组件可以帮助我们完成上拉加载  但是需要一些变量 -->
   <!-- 这里放置一个div的目的是 形成一个滚动条(style样式) 因为后期要做 阅读记忆 -->
   <!-- 阅读记忆：上次阅读到哪 回来之后还是哪 -->
-  <div class="scroll-wrapper">
+  <!-- @scroll事件 记录滚动高度  -->
+  <div class="scroll-wrapper" @scroll="remember" ref="myScroll">
     <!-- 文章列表 组件 -->
     <!-- van-list组件 如果不干涉 初始化完毕 就会检测 自己距离底部的长度 如果超出了限定 就会执行 load事件 自动把绑定的loading 变成 true -->
     <!-- 下拉刷新组件 包裹 列表组件 -->
@@ -89,6 +90,26 @@ export default {
         }
       }
     })
+    // 监听广播
+    eventbus.$on('changeTab', (id) => {
+      // 传入的id 就是当前激活的id
+      // 要判断 当前文章列表 接收的id 是否等于此id 如果相等 表示 该文章列表实例 就是需要去滚动的 实例
+      // 一个tab页下一个 article-list 实例
+      if (id === this.channel_id) {
+        // 为什么这里没有实现效果 因为tab页切换事件 执行之后 article-list组件渲染 是异步的 没有办法 立刻得出渲染结果
+        // 如果相等 表示要执行 此 滚动条
+        // 此时得不到 this.$refs.myScroll
+        // 怎么才能保证 执行 该代码 已经完成了上一次的渲染
+        // this.$nextTick() 因为vue是异步渲染 如果想要等到上一次结果 渲染完成 可以在 this.$nextTick中处理
+        this.$nextTick(() => {
+          // 此时可以保证 之前的上一次的异步渲染已经完成
+          if (this.scrollTop && this.$refs.myScroll) {
+            // 当滚动条距离不为0 并且滚动dom元素 存在的情况下 才去滚动
+            this.$refs.myScroll.scrollTop = this.scrollTop // 滚动到固定位置
+          }
+        })
+      }
+    })
   },
   computed: {
     ...mapState(['user']) // 将user对象映射到计算属性中
@@ -110,7 +131,8 @@ export default {
       upLoading: false, // 表示是否开启上拉加载 默认 false
       finished: false, // 表示是否已经完成 所有数据的加载
       articles: [], // 文章列表内容
-      timestamp: null // 定义时间戳属性 用来存储 后端返回的历史时间戳
+      timestamp: null, // 定义时间戳属性 用来存储 后端返回的历史时间戳
+      scrollTop: 0 // 定义滚动的位置
     }
   },
   methods: {
@@ -196,8 +218,29 @@ export default {
         // 如果没有换来最新的数据
         this.successText = '当前已是最新了'
       }
+    },
+    // 记录滚动事件的方法
+    remember (event) {
+    //  防抖 只执行一次
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        // 500毫秒后触发该函数
+        this.scrollTop = event.target.scrollTop // 记录滚动的位置
+      }, 500)
+    }
+  },
+  //  激活  一个组件 从 睡眠 状态 到 被唤醒
+  // activated  (钩子函数) 只会在 keep-alive包裹的情况下执行
+  activated () {
+    // console.log('唤醒')
+    // 可以在激活函数中 去判读 当前是否 scrollTop 发生了变化
+    if (this.$refs.myScroll && this.scrollTop) {
+      // 判断滚动值是否大于0 有没有dom元素
+      // 将div滚动到原来的位置
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将记录的位置 滚动到 对应位置
     }
   }
+
 }
 </script>
 

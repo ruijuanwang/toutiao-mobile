@@ -8,7 +8,11 @@
      <!-- 中间放二级路由容器 -->
      <!-- 判断当前的地址 如果是/user 就给一个 noTop 的 class -->
    <div class="my-wrapper" :class="{noTop:$route.path=='/user'}" >
-     <router-view></router-view>
+   <!-- 组件缓存 直接缓存二级路由容器 直接使用 kep-alive组件包裹 容器 -->
+    <keep-alive>
+      <!-- 一旦被包裹 路由容器里的组件就不会被销毁 -->
+       <router-view></router-view>
+    </keep-alive>
    </div>
 
 <!-- 底部 tab标签栏 使用van-tabbar组件 -->
