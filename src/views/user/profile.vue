@@ -64,6 +64,7 @@
 <script>
 import dayjs from 'dayjs' // 引入dayjs插件
 import { getUserProfile, updatePhoto, saveUserInfo } from '@/api/user' // 引入获取个人资料  上传头像  保存修改信息 接口
+import { mapMutations } from 'vuex' // 引入vuex中的方法
 export default {
   data () {
     return {
@@ -85,6 +86,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updatePhoto']), // 把更新头像的方法 映射到方法中
     // 关闭昵称弹层事件
     btnName () {
     // 判断 输入内容 1-7位
@@ -134,6 +136,7 @@ export default {
       const result = await updatePhoto(data) // 调上传头像接口
       this.user.photo = result.photo // 把成功上传的头像地址 赋值给当前data 中的photo
       this.showPhoto = false // 关闭头像弹层
+      this.updatePhoto({ photo: result.photo }) // 将最新的头像 更新到 vuex中的头像数据
     },
     // 点击保存时触发 用来保存用户信息 调用接口
     async saveUser () {

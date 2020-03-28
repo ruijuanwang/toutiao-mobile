@@ -58,10 +58,11 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['delUser']), // 引入mutations方法
+    ...mapMutations(['delUser', 'updatePhoto']), // 引入mutations方法 删除用户token方法 修改用户头像方法
     // 获取用户个人信息方法
     async getUserInfo () {
       this.userInfo = await getUserInfo() // 调用接口
+      this.updatePhoto({ photo: this.userInfo.photo }) // 修改vuex中的用户头像
     },
     // 退出登录
     async lgout () {

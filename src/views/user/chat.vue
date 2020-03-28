@@ -4,12 +4,13 @@
     <van-nav-bar fixed left-arrow @click-left="$router.back()" title="小智同学"></van-nav-bar>
     <div class="chat-list">
       <div class="chat-item left">
-        <van-image fit="cover" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+        <!-- 小智同学 -->
+        <van-image fit="cover" round :src="XZImg" />
         <div class="chat-pao">ewqewq</div>
       </div>
       <div class="chat-item right">
         <div class="chat-pao">ewqewq</div>
-        <van-image  fit="cover" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+        <van-image  fit="cover" round :src="photo" />
       </div>
     </div>
     <div class="reply-container van-hairline--top">
@@ -22,12 +23,18 @@
 </template>
 
 <script>
+import XZImg from '@/assets/xz.jpg' // 引入小智头像
+import { mapState } from 'vuex' // 用户头像
 export default {
   data () {
     return {
       value: '', // 绑定输入框内容
-      loading: false // 加载状态
+      loading: false, // 加载状态
+      XZImg // 小智头像
     }
+  },
+  computed: {
+    ...mapState(['photo']) // 映射vuex中的公共变量 到计算属性中 (用户头像 )
   }
 
 }
