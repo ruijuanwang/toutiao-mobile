@@ -3,18 +3,26 @@
  <div class="container">
     <van-nav-bar fixed left-arrow @click-left="$router.back()" title="小智同学"></van-nav-bar>
     <div class="chat-list">
-      <div class="chat-item left">
-        <!-- 小智同学 -->
-        <van-image fit="cover" round :src="XZImg" />
-        <div class="chat-pao">ewqewq</div>
+      <!-- 把list消息循环渲染到视图上 -->
+      <!-- 小智同学说的话在左边 我说的话在右边 -->
+      <!-- name : xz =>小智 左边 name !=xz =>我 =>右边 -->
+      <div class="chat-item" :class="{left:item.name==='xz',right:item.name!=='xz'}" v-for="(item,index) in list" :key="index">
+        <!-- 小智同学 头像-->
+        <van-image v-if="item.name==='xz'" fit="cover" round :src="XZImg" />
+        <!-- 聊天内容 -->
+        <div class="chat-pao">{{ item.msg }}</div>
+        <!-- 我的头像 -->
+        <van-image v-if="item.name!=='xz'"  fit="cover" round :src="photo" />
+
       </div>
-      <div class="chat-item right">
+      <!-- <div class="chat-item right">
         <div class="chat-pao">ewqewq</div>
         <van-image  fit="cover" round :src="photo" />
-      </div>
+      </div> -->
     </div>
     <div class="reply-container van-hairline--top">
-      <van-field v-model="value" placeholder="说点什么...">
+      <!-- trim 修饰符去除两边空格 -->
+      <van-field v-model.trim="value" placeholder="说点什么...">
         <van-loading v-if="loading" slot="button" type="spinner" size="16px"></van-loading>
         <span v-else @click="send()" slot="button" style="font-size:12px;color:#999">提交</span>
       </van-field>
@@ -25,16 +33,64 @@
 <script>
 import XZImg from '@/assets/xz.jpg' // 引入小智头像
 import { mapState } from 'vuex' // 用户头像
+import io from 'socket.io-client'// 引入socke.io的客户端
 export default {
   data () {
     return {
       value: '', // 绑定输入框内容
       loading: false, // 加载状态
-      XZImg // 小智头像
+      XZImg, // 小智头像
+      list: [] // 存放 小智和我的聊天记录
     }
   },
   computed: {
-    ...mapState(['photo']) // 映射vuex中的公共变量 到计算属性中 (用户头像 )
+    ...mapState(['photo', 'user']) // 映射vuex中的公共变量 到计算属性中 (用户头像 )
+  },
+  // 初始化钩子函数
+  created () {
+    // 建立与服务器的连接
+    // new WebSocket (原生)
+    // io 需要穿参数 接口规定
+    // 初始化WebSocket连接
+    // 这里的this.socket 接收的目的是 在其他方法 依然可以 用this.socket 获取对象实例
+    this.socket = io('http://ttapi.research.itcast.cn', {
+      query: {
+        token: this.user.token // vuex中的token
+      }
+    })
+    // 如果连接成功 ws.onopen(原生)
+    this.socket.on('connect', () => {
+      // 此时执行connect事件 表示 已经和服务器 打通了电话
+      // 模拟一条数据 让用户看到 服务器和用户说话了 表示和服务器连接成功
+      this.list.push({ msg: 'hello,胤娟小可爱', name: 'xz' })// 加name的原因 是想区分 这句话是谁说的
+    })
+    // 在此监听回复的消息  接收和发送的类型均为 message 接口规定
+    this.socket.on('message', data => {
+      // data就是 客户服务器 回复的消息 接收的消息都是小智回复的
+      this.list.push({ ...data, name: 'xz' }) // 追加聊天记录
+    })
+  },
+  methods: {
+    // 发送消息
+    async send () {
+      // 调用websocket 发出一个消息
+      // 发消息前 要判断 有没输入内容
+      if (!this.value) return false //  如果为空 就return
+      // 说明不为空 有内容 打开状态 发送消息
+      this.loading = true // 打开发送状态 防止多次重复提交发送
+      await this.$sleep(500) // 休眠函数
+      // 使用websocket发送消息
+      // 使用 socket.emit('消息类型',消息内容)
+      const obj = {
+        msg: this.value, // 我要发送的内容
+        timestamp: Date.now() // 时间戳 表示是从当前时间发送的
+      }
+      this.socket.emit('message', obj) // 发送消息 obj里面的内容是接口规定
+      this.list.push(obj) // 将发出的消息追加到聊天列表中
+      // 发完消息之后
+      this.value = '' // 清空输入框
+      this.loading = false// 关闭状态
+    }
   }
 
 }
