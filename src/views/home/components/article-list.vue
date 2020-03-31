@@ -138,7 +138,7 @@ export default {
   methods: {
     // 1.上拉加载
     async onLoad () {
-      console.log('开始请求文章列表数据')
+      // console.log('开始请求文章列表数据')
       // 如果加载状态 检测机制 高度不够 还是会自动执行 load事件 开启上拉加载
       // 如果有数据 应该把数据加载到 list 中
       // 要想关掉
